@@ -2030,7 +2030,7 @@
         async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
             // This is the relative path to your Netlify serverless function
             // It will be available at this path once deployed.
-            const apiUrl = "/.netlify/functions/gemini";
+            const apiUrl = "https://biowebsite.netlify.app/.netlify/functions/gemini";
 
             // The payload must match what your gemini.js function expects.
             // Your function expects: JSON.parse(event.body).prompt
