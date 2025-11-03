@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Storage Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Professional Color Palette (Adjusted for Liquid Glass) */
+            --color-background: #0d1222; /* Slightly darker to make glass pop more */
+            --color-surface: rgba(26, 32, 53, 0.4); /* Frosted glass effect */
+            --color-text: #f0f0f0; /* Lighter text for contrast */
+            --color-text-secondary: #c0c0c0; /* Muted gray for secondary text */
+            --color-primary: #6da2eb; /* Softer, vibrant blue */
+            --color-primary-hover: #5a8ecb;
+            --color-primary-active: #4a7ab0;
+            --color-secondary: rgba(44, 62, 80, 0.3); /* Transparent secondary for glass effect */
+            --color-secondary-hover: rgba(52, 73, 94, 0.4);
+            --color-border: rgba(255, 255, 255, 0.08); /* Very subtle borders */
+            --color-btn-primary-text: #ffffff;
+            --color-card-border: rgba(255, 255, 255, 0.08); /* Unified subtle border */
+            --color-error: #ff7878; /* A softer red */
+            --color-focus-ring: rgba(109, 162, 235, 0.6); /* More prominent focus ring */
+            --color-divider: rgba(255, 255, 255, 0.05);
+
+            /* Accent colors - Adjusted for vibrancy */
+            --color-accent-blue: #6da2eb;
+            --color-accent-blue-hover: #5a8ecb;
+            --color-accent-purple: #b678d6;
+            --color-accent-pink: #f06292;
+            --color-accent-teal: #4db6ac;
+            --color-accent-green: #69f0ae;
+            --color-accent-yellow: #ffee58;
+            
+            /* Base DNA Colors (slightly adjusted for consistency) */
+            --dna-a: #FF7878; /* Slightly softer red */
+            --dna-t: #6CA6FF; /* Slightly softer blue */
+            --dna-c: #7EE88D; /* Slightly softer green */
+            --dna-g: #FFE066; /* Slightly softer yellow */
+            --dna-a-bg: rgba(255, 120, 120, 0.1);
+            --dna-t-bg: rgba(108, 166, 255, 0.1);
+            --dna-c-bg: rgba(126, 232, 141, 0.1);
+            --dna-g-bg: rgba(255, 224, 102, 0.1);
+            --dna-a-bg-hover: rgba(255, 120, 120, 0.08);
+            --dna-t-bg-hover: rgba(108, 166, 255, 0.08);
+            --dna-c-bg-hover: rgba(126, 232, 141, 0.08);
+            --dna-g-bg-hover: rgba(255, 224, 102, 0.08);
+            --dna-a-border: rgba(255, 120, 120, 0.2);
+            --dna-t-border: rgba(108, 166, 255, 0.2);
+            --dna-c-border: rgba(126, 232, 141, 0.2);
+            --dna-g-border: rgba(255, 224, 102, 0.2);
+
+            --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-size-sm: 13px; /* Slightly larger for readability */
+            --font-size-base: 16px; /* Slightly larger */
+            --font-size-lg: 18px;
+            --font-size-xl: 22px;
+            --font-size-2xl: 24px;
+            --font-size-3xl: 32px; /* Larger main title */
+            --font-size-4xl: 48px; /* For welcome screen */
+            --font-size-5xl: 72px; /* For welcome screen */
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --radius-base: 12px; /* Slightly larger radius */
+            --radius-lg: 16px;
+            --radius-xl: 20px; /* Larger radius for glass cards */
+            --shadow-sm: none; /* Removing harsh shadows */
+            --shadow-md: none;
+            --shadow-lg: none;
+            --duration-normal: 300ms;
+            --duration-slow: 600ms; /* For fades */
+            --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0; /* Remove body padding for full-screen welcome */
+            font-family: var(--font-family-base);
+            font-size: var(--font-size-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6; /* Increased line height */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll from gradients */
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Smoother, larger top glow */
+                radial-gradient(ellipse 70% 30% at 50% 0%, rgba(109, 162, 235, 0.2) 0%, transparent 80%),
+                /* Existing gradients, softened and enlarged */
+                radial-gradient(ellipse 1200px 900px at 10% 40%, rgba(109, 162, 235, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 900px 1200px at 90% 60%, rgba(182, 120, 214, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 600px 600px at 40% 80%, rgba(240, 98, 146, 0.1) 0%, transparent 70%);
+            /* Removed dot grid for cleaner look */
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+            pointer-events: none;
+            z-index: -1; /* Place behind all content */
+            animation: gradientShift 25s ease-in-out infinite alternate; /* Slower, smoother animation */
+        }
+
+        @keyframes gradientShift {
+            0% {
+                opacity: 0.9;
+                /* transform: scale(1) rotate(0deg); */ /* FIX: This breaks position:fixed */
+                background-position: 0% 0%;
+            }
+            50% {
+                opacity: 0.8;
+                /* transform: scale(1.02) rotate(2deg); */ /* FIX: This breaks position:fixed */
+                background-position: 50% 50%;
+            }
+            100% {
+                opacity: 0.9;
+                /* transform: scale(1) rotate(0deg); */ /* FIX: This breaks position:fixed */
+                background-position: 0% 0%;
+            }
+        }
+
+        /* --- NEW: Welcome Screen --- */
+        #welcomeScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 100;
+            background: var(--color-background); /* Match body bg */
+            padding: var(--space-32);
+            transition: opacity var(--duration-slow) var(--ease-standard);
+        }
+
+        .welcome-title {
+            font-size: var(--font-size-5xl);
+            font-weight: var(--font-weight-bold);
+            margin: 0 0 var(--space-16) 0;
+            background: linear-gradient(135deg, var(--color-accent-blue) 0%, var(--color-accent-teal) 50%, var(--color-accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: shimmer 5s linear infinite;
+            letter-spacing: -0.04em;
+            filter: drop-shadow(0 0 15px rgba(109, 162, 235, 0.3));
+        }
+
+        .welcome-subtitle {
+            font-size: var(--font-size-2xl); /* CHANGED: Was xl (22px), now 24px */
+            color: var(--color-text);
+            margin-bottom: var(--space-32);
+            font-weight: var(--font-weight-bold); /* CHANGED: Was semibold (600), now 700 */
+            max-width: 600px;
+            letter-spacing: 0.1em; /* CHANGED: Increased spacing */
+            
+            /* ADDED: Apply gradient and animation to match the title */
+            background: linear-gradient(135deg, var(--color-accent-teal) 0%, var(--color-accent-purple) 50%, var(--color-accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: shimmer 5s linear infinite reverse; /* Reversed animation to contrast title */
+            filter: drop-shadow(0 0 10px rgba(109, 162, 235, 0.2));
+        }
+
+        /* --- MOVED & UPDATED: Site-wide Footer --- */
+        .site-footer {
+            /* REMOVED: position: fixed; */
+            /* REMOVED: bottom: 0; */
+            /* REMOVED: left: 0; */
+            /* REMOVED: width: 100%; */
+            padding: var(--space-12); /* Give it some padding */
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-base); /* CHANGED: Was 14px */
+            font-weight: var(--font-weight-bold); /* CHANGED: Was semibold */
+            line-height: 1.5;
+            opacity: 0.8; /* CHANGED: Was 0.7 */
+            /* REMOVED: z-index: 200; */
+            /* REMOVED: pointer-events: none; */
+            margin-top: var(--space-32); /* ADDED */
+        }
+        
+        .site-footer p {
+            margin: 0;
+        }
+        /* --- End Site-wide Footer --- */
+
+        .container {
+            max-width: 1000px; /* Slightly narrower content for focus */
+            margin: 0 auto;
+            padding: var(--space-24); /* Add padding back to container */
+            padding-bottom: var(--space-32); /* CHANGED: Was 100px */
+            position: relative; /* Ensure container is above background */
+            z-index: 1;
+            transition: opacity var(--duration-slow) var(--ease-standard);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-16);
+                padding-bottom: var(--space-32); /* CHANGED: Was 100px */
+            }
+        }
+
+        h1 {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            margin: 0 0 var(--space-8) 0;
+            background: linear-gradient(135deg, var(--color-accent-blue) 0%, var(--color-accent-teal) 50%, var(--color-accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: shimmer 5s linear infinite;
+            letter-spacing: -0.03em; /* Tighter letter spacing for polish */
+            filter: drop-shadow(0 0 15px rgba(109, 162, 235, 0.3)); /* Softer glow */
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            font-size: var(--font-size-lg); /* Slightly larger subtitle */
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-4); /* Reduced margin for closer association with title */
+            font-weight: var(--font-weight-medium);
+        }
+
+        /* Start Page / Main Menu */
+        /* MODIFIED: Added text-align */
+        #startPage {
+            text-align: center;
+        }
+
+        .card {
+            background: var(--color-surface); /* Uses new transparent surface color */
+            backdrop-filter: blur(25px); /* Stronger blur for glass effect */
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-card-border); /* Subtle border */
+            box-shadow: none; /* No harsh shadows */
+            padding: var(--space-32); /* Increased padding */
+            margin-bottom: var(--space-24); /* Increased bottom margin */
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s var(--ease-standard);
+        }
+
+        .card:hover {
+            transform: translateY(-3px); /* Slightly more pronounced lift */
+            border-color: rgba(255, 255, 255, 0.15); /* Slightly more visible border on hover */
+            background: rgba(26, 32, 53, 0.5); /* Slightly darker on hover */
+        }
+
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            margin: 0 0 var(--space-20) 0; /* Increased margin */
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: var(--font-size-lg); 
+            font-weight: var(--font-weight-semibold); 
+            margin-bottom: var(--space-16); 
+            color: var(--color-text);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-20); /* Increased margin */
+        }
+
+        label {
+            display: block;
+            margin-bottom: var(--space-8);
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: var(--space-12) var(--space-16);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            color: var(--color-text);
+            background: rgba(10, 15, 31, 0.7); /* Slightly transparent background */
+            border: 1px solid var(--color-border); /* Subtle border */
+            border-radius: var(--radius-base);
+            transition: all 0.3s var(--ease-standard);
+            font-family: var(--font-family-base);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Softer inset shadow */
+        }
+
+        input[type="text"]:hover,
+        textarea:hover {
+            background: rgba(16, 22, 42, 0.8); /* Slightly more opaque on hover */
+            border-color: var(--color-primary);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px; /* Taller textarea */
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            background: rgba(16, 22, 42, 0.9); /* More opaque on focus */
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-focus-ring), inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* REMOVED: .mapping-grid and .mapping-item styles are no longer needed for Step 5 */
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-14) var(--space-28); /* Increased padding */
+            border-radius: var(--radius-lg); /* Larger radius for buttons */
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all 0.3s var(--ease-standard);
+            border: none;
+            text-decoration: none;
+            letter-spacing: 0; /* Reset letter spacing */
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        /* Glass effect for buttons */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            z-index: -1;
+            border-radius: inherit;
+        }
+        
+        /* Make disabled buttons look correct */
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(50%);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: var(--color-btn-primary-text);
+            box-shadow: none; /* No shadow */
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: none;
+            filter: none; /* Removed brightness filter */
+        }
+        
+        .btn-primary::after { /* NEW: Subtle border/glow on hover */
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent-teal));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease-standard);
+        }
+
+        .btn-primary:hover:not(:disabled)::after {
+            opacity: 1;
+        }
+
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+            background: var(--color-primary-active);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary); /* Transparent secondary */
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--color-secondary-hover);
+            transform: translateY(-2px);
+            filter: none; /* Removed brightness filter */
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary::after { /* NEW: Subtle border/glow on hover */
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease-standard);
+        }
+
+        .btn-secondary:hover:not(:disabled)::after {
+            opacity: 0.5; /* More subtle glow for secondary */
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--space-16); /* Increased gap */
+            flex-wrap: wrap;
+        }
+        
+        .btn-group-column {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--space-20); /* Increased gap */
+        }
+        
+        .btn-lg {
+             padding: var(--space-20) var(--space-32); /* Increased padding */
+             font-size: var(--font-size-lg);
+        }
+
+        .output-section {
+            margin-top: var(--space-24); /* Increased margin */
+        }
+
+        .output-label {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-12); /* Increased margin */
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .output-text {
+            padding: var(--space-16) var(--space-20); /* Increased padding */
+            background: rgba(10, 15, 31, 0.7); /* Transparent background */
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+            word-break: break-all;
+            min-height: 70px; /* Taller output boxes */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .output-text-dna {
+            font-size: var(--font-size-lg); 
+            letter-spacing: 2px; 
+            line-height: 2; 
+            min-height: 90px;
+        }
+
+        .info-box {
+            padding: var(--space-16);
+            background: rgba(109, 162, 235, 0.08); /* More subtle background */
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--space-20); /* Increased margin */
+            border-left: 3px solid var(--color-primary);
+        }
+        
+        /* NEW: Specific styling for Gemini info boxes */
+        .gemini-info-box {
+            background: rgba(182, 120, 214, 0.1);
+            border-left-color: var(--color-accent-purple);
+            line-height: 1.7;
+            display: flex; /* For loader */
+            align-items: center;
+            gap: var(--space-12);
+            flex-wrap: wrap; /* Allow wrapping */
+        }
+        
+        /* NEW: SVG Loader */
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--color-accent-purple);
+            animation: spin 1s ease-in-out infinite;
+            flex-shrink: 0; /* Prevent loader from shrinking */
+        }
+        
+        /* NEW: Loader content wrapper */
+        .loader-content {
+            display: none; /* Hidden by default */
+            align-items: center;
+            gap: var(--space-12);
+        }
+        
+        /* NEW: Gemini text content wrapper */
+        .gemini-text-content {
+            flex-basis: 100%; /* Take full width for typing */
+        }
+
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-12); /* Increased margin */
+        }
+
+        /* --- Re-usable Stat/Base Box Grid --- */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Slightly smaller min-width */
+            gap: var(--space-16); /* Increased gap */
+        }
+        
+        @media (min-width: 768px) {
+            .stat-grid-4-col {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        .stat-box {
+            padding: var(--space-16); /* Increased padding */
+            border-radius: var(--radius-lg); /* Larger radius */
+            text-align: center;
+            border: 1px solid;
+            background: rgba(255, 255, 255, 0.05); /* Very subtle background */
+            backdrop-filter: blur(15px); /* Added blur to stat boxes */
+            -webkit-backdrop-filter: blur(15px);
+        }
+        
+        .stat-box-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .stat-box-subtitle {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--space-8); /* Increased margin */
+        }
+        
+        .stat-box-main {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            margin-top: var(--space-12); /* Increased margin */
+            color: var(--color-text);
+        }
+
+        /* --- Specific CSS for Custom Mapping Inputs in Stat-Box --- */
+        .custom-mapping-input-wrapper {
+            margin-top: var(--space-12); /* Adjusted margin */
+        }
+
+        .custom-mapping-input {
+            width: 80px !important; /* Override default 100% width */
+            padding: var(--space-8) var(--space-12) !important;
+            font-size: var(--font-size-base) !important;
+            text-align: center;
+            font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+            font-weight: var(--font-weight-semibold);
+            background: rgba(10, 15, 31, 0.7) !important;
+            border: 1px solid var(--color-border) !important;
+            border-radius: var(--radius-base) !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1) !important;
+        }
+
+        .custom-mapping-input:focus {
+            background: rgba(16, 22, 42, 0.9) !important;
+            border-color: var(--color-primary) !important;
+            box-shadow: 0 0 0 3px var(--color-focus-ring), inset 0 1px 3px rgba(0,0,0,0.2) !important;
+        }
+        /* --- End Custom Mapping Input CSS --- */
+
+
+        /* --- Specific Base Colors for Stat Boxes --- */
+        .stat-box-a { border-color: var(--dna-a-border); }
+        .stat-box-a .stat-box-title { color: var(--dna-a); }
+
+        .stat-box-t { border-color: var(--dna-t-border); }
+        .stat-box-t .stat-box-title { color: var(--dna-t); }
+
+        .stat-box-c { border-color: var(--dna-c-border); }
+        .stat-box-c .stat-box-title { color: var(--dna-c); }
+
+        .stat-box-g { border-color: var(--dna-g-border); }
+        .stat-box-g .stat-box-title { color: var(--dna-g); }
+        
+        /* --- DNA Bar Visualization (Step 2) --- */
+        #dnaBarContainer {
+            display: flex; 
+            gap: 3px; /* Slightly larger gap */
+            flex-wrap: wrap; 
+            padding: var(--space-20); /* Increased padding */
+            background: rgba(255, 255, 255, 0.08); /* Frosted background */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--radius-lg); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            min-height: 80px; /* Taller container */
+            position: relative; /* For tooltip */
+            overflow-x: auto; /* Allow scrolling if many bases */
+        }
+        
+        .dna-bar-block {
+            width: 25px; /* Wider block */
+            height: 50px; /* Taller block */
+            border-radius: 6px; /* Softer corners */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px; /* Larger font */
+            font-weight: var(--font-weight-semibold);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Softer shadow */
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            cursor: default; /* Default cursor */
+            user-select: none; /* Prevent text selection */
+            flex-shrink: 0; /* Prevent blocks from shrinking */
+        }
+        
+        .dna-bar-block:hover {
+            transform: scale(1.08) translateY(-4px); /* Slightly more subtle lift than before */
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* NEW: DNA Bar Tooltip */
+        #dnaTooltip {
+            position: absolute;
+            background: #000;
+            color: #fff;
+            padding: var(--space-8) var(--space-12);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+            border: 1px solid var(--color-border);
+            z-index: 10;
+            pointer-events: none;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.2s var(--ease-standard);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        /* --- Seamless UI Transitions --- */
+        
+        /* NEW: Transitionable class for slide/fade */
+        .transitionable {
+            transition: all var(--duration-normal) var(--ease-standard);
+            overflow: hidden;
+        }
+
+        /* NEW: State for slide/fade animation */
+        .slide-fade-container {
+            display: grid;
+            grid-template-rows: 0fr; /* Start collapsed */
+            opacity: 0.5;
+            transition: 
+                grid-template-rows var(--duration-normal) var(--ease-standard),
+                opacity var(--duration-normal) var(--ease-standard);
+        }
+        
+        .slide-fade-container.show {
+            grid-template-rows: 1fr; /* Expand to content size */
+            opacity: 1;
+        }
+
+        /* The direct child must have this to work */
+        .slide-fade-content {
+            min-height: 0;
+            overflow: hidden;
+        }
+        
+        /* Apply to all collapsible sections */
+        .error-message {
+            /* Now uses slide-fade, see JS */
+        }
+
+        /* --- Responsive Media Queries --- */
+        @media (max-width: 768px) {
+            .welcome-title {
+                font-size: var(--font-size-4xl);
+            }
+            .welcome-subtitle {
+                font-size: var(--font-size-lg);
+            }
+            .container {
+                padding: var(--space-16);
+                padding-bottom: var(--space-32); /* STANDARDIZED: Was 100px */
+            }
+            h1 {
+                font-size: var(--font-size-2xl);
+            }
+            .subtitle {
+                font-size: var(--font-size-base);
+            }
+            .card {
+                padding: var(--space-20);
+            }
+            /* UPDATED: .mapping-grid no longer used in Step 5 */
+            .btn {
+                padding: var(--space-12) var(--space-20);
+            }
+            .btn-lg {
+                padding: var(--space-16) var(--space-24);
+            }
+            .dna-bar-block {
+                width: 20px;
+                height: 40px;
+                font-size: 12px;
+            }
+            #dnaBarContainer {
+                padding: var(--space-12);
+                min-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- NEW: Welcome Screen -->
+    <div id="welcomeScreen">
+        <h1 class="welcome-title">Future of Data Storage</h1>
+        <p class="welcome-subtitle">DNA</p>
+        <button class="btn btn-primary btn-lg" id="welcomeBtn">Start Encoding</button>
+
+        <!-- ADDED FOOTER HERE AS REQUESTED -->
+        <footer class="site-footer">
+            <p>created by<br>
+            SUYASH MOODBIDRI-N086<br>
+            TAPAS MEHTA-N082</p>
+        </footer>
+    </div>
+
+    <!-- Main container for the app -->
+    <div class="container" id="appContainer" style="opacity: 0; pointer-events: none;"> <!-- Hidden by default -->
+        
+        <!-- Start Page / Main Menu -->
+        <div id="startPage" style="display: none; text-align: center;"> <!-- MODIFIED: Hidden by default -->
+            <h1>DNA-Based Storage System Simulation</h1>
+            <p class="subtitle">Encode text to DNA sequences with customizable base mappings and visualize</p>
+
+            <div class="card">
+                <h2 class="section-title">Select a Step to Begin</h2>
+                <div class="btn-group btn-group-column">
+                    <!-- OPTIMIZATION: Added IDs for addEventListener -->
+                    <button class="btn btn-primary btn-lg" id="btnMenuEncode">
+                        Input Text to Encode
+                    </button>
+                    <button class="btn btn-primary btn-lg" id="btnMenuDecode">
+                        Decode DNA to Text
+                    </button>
+                    <button class="btn btn-primary btn-lg" id="btnMenuResimulate">
+                        Resimulate with Custom Values
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADDED FOOTER HERE AS REQUESTED -->
+            <footer class="site-footer">
+                <p>created by<br>
+                SUYASH MOODBIDRI-N086<br>
+                TAPAS MEHTA-N082</p>
+            </footer>
+        </div>
+
+        <!-- Main Content Area (hidden by default) -->
+        <div id="mainContent" style="display: none;">
+            
+            <!-- RE-ADDED MISSING HEADER WITH btnBackToStart -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-32); flex-wrap: wrap; gap: var(--space-16);"> 
+                <div style="flex-grow: 1; text-align: center;">
+                    <h1>DNA-Based Storage System Simulation</h1>
+                    <p class="subtitle">Encode text to DNA sequences with customizable base mappings and visualize</p>
+                </div>
+                <button class="btn btn-secondary btn-lg" id="btnBackToStart">← Back to Start</button>
+            </div>
+
+            <!-- REMOVED: Step 1 was here. It's no longer needed as it was hidden and logic is now in JS. -->
+
+            <!-- Step 2: Input & Encode -->
+            <div class="card" id="step2" style="display: none;"> <!-- Added style="display: none;" -->
+                <h2 class="section-title">Input Text to Encode</h2>
+                
+                <div class="form-group">
+                    <label for="inputText">Enter text to convert to DNA (Uses default A=00, T=01, C=10, G=11):</label>
+                    <textarea id="inputText" placeholder="Type your message here...">Hello DNA</textarea>
+                    <!-- Gemini loading/message area -->
+                    <div id="generateMessageContainer" class="slide-fade-container transitionable">
+                        <div class="slide-fade-content">
+                            <div id="generateMessage" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                <div class="loader-content">
+                                    <div class="loader"></div>
+                                    <span>Generating...</span>
+                                </div>
+                                <span class="gemini-text-content"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group btn-group-column">
+                    <button class="btn btn-primary btn-lg" id="btnEncode">Encode to DNA</button>
+                    <!-- Gemini Generate Button -->
+                    <button class="btn btn-secondary btn-lg" id="btnGenerateData">✨ Generate Sample Text</button>
+                    <button class="btn btn-secondary btn-lg" id="btnDecodeNav">Decode from DNA</button>
+                    <button class="btn btn-secondary btn-lg" id="btnResimulate">Re-simulate (New Mappings)</button>
+                </div>
+                
+                <div id="errorStep2Container" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                         <div id="errorStep2" class="error-message"></div>
+                    </div>
+                </div>
+
+                <!-- Base Mapping Display -->
+                <div id="baseMappingDisplayContainer" class="slide-fade-container transitionable" style="transition-delay: 100ms;">
+                    <div class="slide-fade-content">
+                        <div id="baseMappingDisplay" style="margin-top: var(--space-32);"> 
+                            <h3 class="section-subtitle">Base Mapping Used</h3>
+                            <div class="stat-grid stat-grid-4-col">
+                                <div class="stat-box stat-box-a">
+                                    <div class="stat-box-title">A</div>
+                                    <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Adenine</div>
+                                    <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="mapDisplayA">Binary: 00</div>
+                                </div>
+                                <div class="stat-box stat-box-t">
+                                    <div class="stat-box-title">T</div>
+                                    <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Thymine</div>
+                                    <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="mapDisplayT">Binary: 01</div>
+                                </div>
+                                <div class="stat-box stat-box-c">
+                                    <div class="stat-box-title">C</div>
+                                    <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Cytosine</div>
+                                    <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="mapDisplayC">Binary: 10</div>
+                                </div>
+                                <div class="stat-box stat-box-g">
+                                    <div class="stat-box-title">G</div>
+                                    <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Guanine</div>
+                                    <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="mapDisplayG">Binary: 11</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gemini Explanation Section -->
+                <div id="geminiExplainStep2Container" class="slide-fade-container transitionable">
+                     <div class="slide-fade-content">
+                        <div id="geminiExplainStep2" class="gemini-explain-container" style="margin-top: var(--space-32);">
+                            <button class="btn btn-secondary btn-lg" id="btnExplainConceptStep2">✨ What does this represent?</button>
+                            <div id="explainMessageStep2Container" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                    <div id="explainMessageStep2" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                        <div class="loader-content">
+                                            <div class="loader"></div>
+                                            <span>Generating...</span>
+                                        </div>
+                                        <span class="gemini-text-content"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encoded DNA Sequence -->
+                <div id="encodedSequenceDisplayContainer" class="slide-fade-container transitionable" style="transition-delay: 200ms;">
+                    <div class="slide-fade-content">
+                        <div id="encodedSequenceDisplay" style="margin-top: var(--space-32);">
+                            <h3 class="section-subtitle">Encoded DNA Sequence</h3>
+                            <div class="output-text output-text-dna" id="dnaSequenceDisplay">DNA sequence will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DNA Visualization Bar -->
+                <div id="dnaVisualizationBarContainer" class="slide-fade-container transitionable" style="transition-delay: 300ms;">
+                    <div class="slide-fade-content">
+                        <div id="dnaVisualizationBar" style="margin-top: var(--space-32);">
+                            <h3 class="section-subtitle">DNA Visualization</h3>
+                            <div id="dnaBarContainer">
+                                <!-- Blocks generated by JS -->
+                            </div>
+                            <!-- NEW: Tooltip -->
+                            <div id="dnaTooltip"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Base Occurrence Statistics -->
+                <div id="baseStatisticsContainer" class="slide-fade-container transitionable" style="transition-delay: 400ms;">
+                    <div class="slide-fade-content">
+                        <div id="baseStatistics" style="margin-top: var(--space-32);">
+                            <h3 class="section-subtitle">Base Occurrence Statistics</h3>
+                            <div class="stat-grid stat-grid-4-col">
+                                <div class="stat-box stat-box-a">
+                                    <div class="stat-box-title">A</div>
+                                    <div class="stat-box-main" id="countA">0</div>
+                                    <div class="stat-box-subtitle" id="percentA">0%</div>
+                                </div>
+                                 <div class="stat-box stat-box-t">
+                                    <div class="stat-box-title">T</div>
+                                    <div class="stat-box-main" id="countT">0</div>
+                                    <div class="stat-box-subtitle" id="percentT">0%</div>
+                                </div>
+                                 <div class="stat-box stat-box-c">
+                                    <div class="stat-box-title">C</div>
+                                    <div class="stat-box-main" id="countC">0</div>
+                                    <div class="stat-box-subtitle" id="percentC">0%</div>
+                                </div>
+                                 <div class="stat-box stat-box-g">
+                                    <div class="stat-box-title">G</div>
+                                    <div class="stat-box-main" id="countG">0</div>
+                                    <div class="stat-box-subtitle" id="percentG">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Decode -->
+            <div class="card" id="step4" style="display: none;"> <!-- Added style="display: none;" -->
+                <h2 class="section-title">Decode DNA to Text</h2>
+                
+                <!-- DNA Bases Sequence -->
+                <div style="margin-bottom: var(--space-32);">
+                    <h3 class="section-subtitle">DNA Bases Sequence</h3>
+                    <div class="output-text output-text-dna" id="dnaSequenceDisplay4">DNA sequence from encoding will appear here...</div>
+                </div>
+
+                <!-- Nitrogenous Bases Display -->
+                <div style="margin-bottom: var(--space-32);">
+                    <h3 class="section-subtitle">Nitrogenous Bases (Last Used Mapping)</h3>
+                    <div class="stat-grid stat-grid-4-col">
+                        <!-- MODIFIED: IDs for dynamic content -->
+                        <div class="stat-box stat-box-a">
+                            <div class="stat-box-title" style="font-size: var(--font-size-3xl);">A</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Adenine</div>
+                            <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="decodeMapA">Binary: 00</div>
+                        </div>
+                        <div class="stat-box stat-box-t">
+                            <div class="stat-box-title" style="font-size: var(--font-size-3xl);">T</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Thymine</div>
+                            <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="decodeMapT">Binary: 01</div>
+                        </div>
+                        <div class="stat-box stat-box-c">
+                            <div class="stat-box-title" style="font-size: var(--font-size-3xl);">C</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Cytosine</div>
+                            <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="decodeMapC">Binary: 10</div>
+                        </div>
+                        <div class="stat-box stat-box-g">
+                            <div class="stat-box-title" style="font-size: var(--font-size-3xl);">G</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Guanine</div>
+                            <div class="stat-box-subtitle" style="font-size: var(--font-size-sm);" id="decodeMapG">Binary: 11</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group btn-group-column" style="margin-bottom: var(--space-32);">
+                    <button class="btn btn-primary btn-lg" id="btnPerformDecode">Decode DNA Sequence</button>
+                    <button class="btn btn-secondary btn-lg" id="btnResimulateFromDecode">Re-simulate (New Mappings)</button>
+                </div>
+                
+                <div id="errorStep4Container" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="errorStep4" class="error-message"></div>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-label">Binary Representation:</div>
+                    <div class="output-text" id="binaryOutput">Press "Decode DNA Sequence" to see binary...</div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-label">Decoded Text:</div>
+                    <div class="output-text" id="decodedOutput" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-accent-teal);">Press "Decode DNA Sequence" to see decoded text...</div>
+                </div>
+
+                <!-- NEW: Gemini Explanation Section for Step 4 -->
+                <div id="geminiExplainStep4Container" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="geminiExplainStep4" class="gemini-explain-container" style="margin-top: var(--space-32);">
+                            <button class="btn btn-secondary btn-lg" id="btnExplainConceptStep4">✨ What does this represent?</button>
+                            <div id="explainMessageStep4Container" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                    <div id="explainMessageStep4" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                        <div class="loader-content">
+                                            <div class="loader"></div>
+                                            <span>Generating...</span>
+                                        </div>
+                                        <span class="gemini-text-content"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- NEW: Data Corruption / Healing -->
+                <div id="dataCorruptionContainer" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="dataCorruptionSection" style="margin-top: var(--space-32);">
+                             <h3 class="section-subtitle">Data Corruption & Healing</h3>
+                             <p style="margin-bottom: var(--space-20); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                                Simulate real-world data degradation and use AI to attempt error correction.
+                             </p>
+                             
+                             <div class="btn-group" style="margin-bottom: var(--space-20);">
+                                 <button class="btn btn-secondary btn-lg" id="btnCorruptData">🧬 Introduce Errors</button>
+                                 <button class="btn btn-primary btn-lg" id="btnHealData">✨ Attempt to Heal Text</button>
+                             </div>
+                             
+                             <div id="healMessageContainer" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                    <div id="healMessage" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                        <div class="loader-content">
+                                            <div class="loader"></div>
+                                            <span>Generating...</span>
+                                        </div>
+                                        <span class="gemini-text-content"></span>
+                                    </div>
+                                </div>
+                            </div>
+                             
+                             <div id="healedOutputContainer" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                     <div class="output-section">
+                                        <div class="output-label">AI-Healed Text:</div>
+                                        <div class="output-text" id="healedTextOutput" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-accent-green);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Custom Resimulation -->
+            <div class="card" id="step5" style="display: none;">
+                <h2 class="section-title">Resimulate with Custom Values</h2>
+
+                <div class="form-group">
+                    <label for="customInputText">Enter text to encode:</label>
+                    <textarea id="customInputText" placeholder="Type your message here..."></textarea>
+                    <div id="generateMessageStep5Container" class="slide-fade-container transitionable">
+                        <div class="slide-fade-content">
+                            <div id="generateMessageStep5" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                <div class="loader-content">
+                                    <div class="loader"></div>
+                                    <span>Generating...</span>
+                                </div>
+                                <span class="gemini-text-content"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPDATED: Replaced mapping-grid with stat-grid -->
+                <div class="form-group">
+                    <label>Set custom base values for ATCG (2-digit binary):</label>
+                    <div class="stat-grid stat-grid-4-col">
+                        <!-- Adenine -->
+                        <div class="stat-box stat-box-a" style="padding-bottom: var(--space-20);">
+                            <div class="stat-box-title">A</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Adenine</div>
+                            <div class="custom-mapping-input-wrapper">
+                                <input type="text" id="customMapA" value="00" maxlength="2" class="custom-mapping-input">
+                            </div>
+                        </div>
+                        <!-- Thymine -->
+                        <div class="stat-box stat-box-t" style="padding-bottom: var(--space-20);">
+                            <div class="stat-box-title">T</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Thymine</div>
+                            <div class="custom-mapping-input-wrapper">
+                                <input type="text" id="customMapT" value="01" maxlength="2" class="custom-mapping-input">
+                            </div>
+                        </div>
+                        <!-- Cytosine -->
+                        <div class="stat-box stat-box-c" style="padding-bottom: var(--space-20);">
+                            <div class="stat-box-title">C</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Cytosine</div>
+                            <div class="custom-mapping-input-wrapper">
+                                <input type="text" id="customMapC" value="10" maxlength="2" class="custom-mapping-input">
+                            </div>
+                        </div>
+                        <!-- Guanine -->
+                        <div class="stat-box stat-box-g" style="padding-bottom: var(--space-20);">
+                            <div class="stat-box-title">G</div>
+                            <div class="stat-box-subtitle" style="margin-top: var(--space-8);">Guanine</div>
+                            <div class="custom-mapping-input-wrapper">
+                                <input type="text" id="customMapG" value="11" maxlength="2" class="custom-mapping-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group btn-group-column">
+                    <button class="btn btn-primary btn-lg" id="btnCustomEncode">Encode with Custom Values</button>
+                    <button class="btn btn-secondary btn-lg" id="btnCustomGenerateData">✨ Generate Sample Text</button>
+                    <button class="btn btn-secondary btn-lg" id="btnCustomDecode">Decode with Custom Values</button>
+                    <button class="btn btn-secondary btn-lg" id="btnCustomBack">Back to Menu</button>
+                </div>
+                
+                <div id="errorStep5Container" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="errorStep5" class="error-message"></div>
+                    </div>
+                </div>
+
+                <div id="geminiExplainStep5Container" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="geminiExplainStep5" class="gemini-explain-container" style="margin-top: var(--space-32);">
+                            <button class="btn btn-secondary btn-lg" id="btnExplainConceptStep5">✨ What does this represent?</button>
+                            <div id="explainMessageStep5Container" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                    <div id="explainMessageStep5" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                        <div class="loader-content">
+                                            <div class="loader"></div>
+                                            <span>Generating...</span>
+                                        </div>
+                                        <span class="gemini-text-content"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-label">DNA Sequence (ATCG Format):</div>
+                    <div class="output-text" id="customDnaSequence"></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-label">DNA Sequence (Binary):</div>
+                    <div class="output-text" id="customBinarySequence"></div>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-label">Decoded Text:</div>
+                    <div class="output-text" id="customDecodedText"></div>
+                </div>
+                
+                <div id="dataCorruptionContainerStep5" class="slide-fade-container transitionable">
+                    <div class="slide-fade-content">
+                        <div id="dataCorruptionSectionStep5" style="margin-top: var(--space-32);">
+                             <h3 class="section-subtitle">Data Corruption & Healing (Custom)</h3>
+                             <p style="margin-bottom: var(--space-20); color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                                Simulate real-world data degradation and use AI to attempt error correction.
+                             </p>
+                             
+                             <div class="btn-group" style="margin-bottom: var(--space-20);">
+                                 <button class="btn btn-secondary btn-lg" id="btnCorruptDataStep5">🧬 Introduce Errors</button>
+                                 <button class="btn btn-primary btn-lg" id="btnHealDataStep5">✨ Attempt to Heal Text</button>
+                             </div>
+                             
+                             <div id="healMessageContainerStep5" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                    <div id="healMessageStep5" class="info-box gemini-info-box" style="margin-top: var(--space-16);">
+                                        <div class="loader-content">
+                                            <div class="loader"></div>
+                                            <span>Generating...</span>
+                                        </div>
+                                        <span class="gemini-text-content"></span>
+                                    </div>
+                                </div>
+                            </div>
+                             
+                             <div id="healedOutputContainerStep5" class="slide-fade-container transitionable">
+                                <div class="slide-fade-content">
+                                     <div class="output-section">
+                                        <div class="output-label">AI-Healed Text (Custom):</div>
+                                        <div class="output-text" id="healedTextOutputStep5" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-accent-green);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADDED FOOTER HERE AS WELL -->
+            <footer class="site-footer">
+                <p>created by<br>
+                SUYASH MOODBIDRI-N086<br>
+                TAPAS MEHTA-N082</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS ---
+        const DEFAULT_MAPPINGS = {
+            '00': 'A',
+            '01': 'T',
+            '10': 'C',
+            '11': 'G'
+        };
+        
+        // DNA base colors
+        const baseColors = {
+            'A': 'var(--dna-a)', // Red
+            'T': 'var(--dna-t)', // Blue
+            'C': 'var(--dna-c)', // Green
+            'G': 'var(--dna-g)'  // Yellow
+        };
+        
+        const DURATION_NORMAL = 300;
+        const DURATION_SLOW = 600;
+
+        // --- GLOBAL STATE ---
+        let currentDNA = '';
+        let currentBinary = '';
+        let currentReverseMappings = {}; // Store reverse mappings of the last encoding
+        let lastOriginalText = ''; // Store the last text that was encoded
+        let encodeDebounceTimer; // For real-time encoding
+        let holdTimer; // For tooltip
+        let isHolding = false;
+        
+        // --- AUDIO ENGINE ---
+        let audioCtx;
+
+        /**
+         * Call this on the *first* user click to initialize audio
+         */
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error("AudioContext is not supported.", e);
+                }
+            }
+        }
+
+        /**
+         * Plays a synthesized sound effect.
+         * @param {string} soundType - 'click', 'swoosh', 'success', 'error', 'glitch', 'heal'
+         */
+        function playSound(soundType) {
+            if (!audioCtx) return; // Audio not initialized
+
+            const now = audioCtx.currentTime;
+            let oscillator, gainNode;
+
+            try {
+                switch (soundType) {
+                    case 'click':
+                        oscillator = audioCtx.createOscillator();
+                        gainNode = audioCtx.createGain();
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(880, now);
+                        gainNode.gain.setValueAtTime(0.3, now); // Quieter click
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.1);
+                        break;
+
+                    case 'swoosh':
+                        const bufferSize = audioCtx.sampleRate * 0.5; // 0.5 sec
+                        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            data[i] = Math.random() * 2 - 1;
+                        }
+                        const whiteNoise = audioCtx.createBufferSource();
+                        whiteNoise.buffer = buffer;
+                        const filter = audioCtx.createBiquadFilter();
+                        filter.type = 'bandpass';
+                        filter.frequency.setValueAtTime(1000, now);
+                        filter.Q.setValueAtTime(1, now);
+                        filter.frequency.exponentialRampToValueAtTime(8000, now + 0.4);
+                        filter.Q.exponentialRampToValueAtTime(0.1, now + 0.4);
+                        gainNode = audioCtx.createGain();
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                        whiteNoise.connect(filter);
+                        filter.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        whiteNoise.start(now);
+                        whiteNoise.stop(now + 0.5);
+                        break;
+                        
+                    case 'success':
+                        oscillator = audioCtx.createOscillator();
+                        gainNode = audioCtx.createGain();
+                        oscillator.type = 'sine';
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        // C4, E4, G4, C5
+                        oscillator.frequency.setValueAtTime(261.63, now);
+                        oscillator.frequency.setValueAtTime(329.63, now + 0.1);
+                        oscillator.frequency.setValueAtTime(392.00, now + 0.2);
+                        oscillator.frequency.setValueAtTime(523.25, now + 0.3);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.5);
+                        break;
+
+                    case 'error':
+                        oscillator = audioCtx.createOscillator();
+                        gainNode = audioCtx.createGain();
+                        oscillator.type = 'sawtooth';
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        // G#3, G3, F#3
+                        oscillator.frequency.setValueAtTime(207.65, now);
+                        oscillator.frequency.setValueAtTime(196.00, now + 0.1);
+                        oscillator.frequency.setValueAtTime(185.00, now + 0.2);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.5);
+                        break;
+                        
+                    case 'glitch':
+                        oscillator = audioCtx.createOscillator();
+                        gainNode = audioCtx.createGain();
+                        oscillator.type = 'square';
+                        gainNode.gain.setValueAtTime(0.2, now);
+                        oscillator.frequency.setValueAtTime(100, now);
+                        oscillator.frequency.linearRampToValueAtTime(20, now + 0.1);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start(now);
+                        oscillator.stop(now + 0.1);
+                        break;
+
+                    case 'heal':
+                        oscillator = audioCtx.createOscillator();
+                        gainNode = audioCtx.createGain();
+                        oscillator.type = 'triangle';
+                        gainNode.gain.setValueAtTime(0.0, now);
+                        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.2);
+                        gainNode.gain.linearRampToValueAtTime(0, now + 0.8);
+                        oscillator.frequency.setValueAtTime(600, now);
+                        oscillator.frequency.linearRampToValueAtTime(1200, now + 0.8);
+                        // Vibrato
+                        const lfo = audioCtx.createOscillator();
+                        lfo.type = 'sine';
+                        lfo.frequency.setValueAtTime(5, now);
+                        const lfoGain = audioCtx.createGain();
+                        lfoGain.gain.setValueAtTime(15, now);
+                        lfo.connect(lfoGain);
+                        lfoGain.connect(oscillator.frequency);
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        lfo.start(now);
+                        oscillator.start(now);
+                        lfo.stop(now + 0.8);
+                        oscillator.stop(now + 0.8);
+                        break;
+                }
+            } catch (e) {
+                console.error("Error playing sound:", e);
+            }
+        }
+        
+        // --- DOM CACHE ---
+        
+        /**
+         * Cached all DOM elements for performance and readability.
+         */
+        const elements = {
+            // NEW: Welcome Screen
+            welcomeScreen: document.getElementById('welcomeScreen'),
+            welcomeBtn: document.getElementById('welcomeBtn'),
+            appContainer: document.getElementById('appContainer'),
+            
+            startPage: document.getElementById('startPage'),
+            mainContent: document.getElementById('mainContent'),
+            // Menu Buttons
+            btnMenuEncode: document.getElementById('btnMenuEncode'),
+            btnMenuDecode: document.getElementById('btnMenuDecode'),
+            btnMenuResimulate: document.getElementById('btnMenuResimulate'),
+            btnBackToStart: document.getElementById('btnBackToStart'),
+            
+            // Step 2
+            step2: document.getElementById('step2'),
+            inputText: document.getElementById('inputText'),
+            // REMOVED: map00, map01, map10, map11
+            btnEncode: document.getElementById('btnEncode'),
+            btnDecodeNav: document.getElementById('btnDecodeNav'),
+            btnResimulate: document.getElementById('btnResimulate'),
+            errorStep2Container: document.getElementById('errorStep2Container'),
+            errorStep2: document.getElementById('errorStep2'),
+            // Step 2 Result Containers
+            baseMappingDisplayContainer: document.getElementById('baseMappingDisplayContainer'),
+            baseMappingDisplay: document.getElementById('baseMappingDisplay'),
+            encodedSequenceDisplayContainer: document.getElementById('encodedSequenceDisplayContainer'),
+            encodedSequenceDisplay: document.getElementById('encodedSequenceDisplay'),
+            dnaSequenceDisplay: document.getElementById('dnaSequenceDisplay'),
+            dnaVisualizationBarContainer: document.getElementById('dnaVisualizationBarContainer'),
+            dnaVisualizationBar: document.getElementById('dnaVisualizationBar'),
+            dnaBarContainer: document.getElementById('dnaBarContainer'),
+            baseStatisticsContainer: document.getElementById('baseStatisticsContainer'),
+            baseStatistics: document.getElementById('baseStatistics'),
+            dnaTooltip: document.getElementById('dnaTooltip'),
+            // Step 2 Mapping Display (Renamed IDs)
+            mapDisplayA: document.getElementById('mapDisplayA'),
+            mapDisplayT: document.getElementById('mapDisplayT'),
+            mapDisplayC: document.getElementById('mapDisplayC'),
+            mapDisplayG: document.getElementById('mapDisplayG'),
+            // Step 2 Stats
+            countA: document.getElementById('countA'),
+            percentA: document.getElementById('percentA'),
+            countT: document.getElementById('countT'),
+            percentT: document.getElementById('percentT'),
+            countC: document.getElementById('countC'),
+            percentC: document.getElementById('percentC'),
+            countG: document.getElementById('countG'),
+            percentG: document.getElementById('percentG'),
+            // Gemini elements for Step 2
+            btnGenerateData: document.getElementById('btnGenerateData'),
+            generateMessageContainer: document.getElementById('generateMessageContainer'),
+            generateMessage: document.getElementById('generateMessage'),
+            geminiExplainStep2Container: document.getElementById('geminiExplainStep2Container'),
+            geminiExplainStep2: document.getElementById('geminiExplainStep2'),
+            btnExplainConceptStep2: document.getElementById('btnExplainConceptStep2'),
+            explainMessageStep2Container: document.getElementById('explainMessageStep2Container'),
+            explainMessageStep2: document.getElementById('explainMessageStep2'),
+            
+            // Step 4
+            step4: document.getElementById('step4'),
+            dnaSequenceDisplay4: document.getElementById('dnaSequenceDisplay4'),
+            btnPerformDecode: document.getElementById('btnPerformDecode'),
+            btnResimulateFromDecode: document.getElementById('btnResimulateFromDecode'),
+            errorStep4Container: document.getElementById('errorStep4Container'),
+            errorStep4: document.getElementById('errorStep4'),
+            binaryOutput: document.getElementById('binaryOutput'),
+            decodedOutput: document.getElementById('decodedOutput'),
+            // Step 4 Dynamic Mapping
+            decodeMapA: document.getElementById('decodeMapA'),
+            decodeMapT: document.getElementById('decodeMapT'),
+            decodeMapC: document.getElementById('decodeMapC'),
+            decodeMapG: document.getElementById('decodeMapG'),
+            // Gemini elements for Step 4
+            geminiExplainStep4Container: document.getElementById('geminiExplainStep4Container'),
+            geminiExplainStep4: document.getElementById('geminiExplainStep4'),
+            btnExplainConceptStep4: document.getElementById('btnExplainConceptStep4'),
+            explainMessageStep4Container: document.getElementById('explainMessageStep4Container'),
+            explainMessageStep4: document.getElementById('explainMessageStep4'),
+            // Step 4 Data Corruption
+            dataCorruptionContainer: document.getElementById('dataCorruptionContainer'),
+            btnCorruptData: document.getElementById('btnCorruptData'),
+            btnHealData: document.getElementById('btnHealData'),
+            healMessageContainer: document.getElementById('healMessageContainer'),
+            healMessage: document.getElementById('healMessage'),
+            healedOutputContainer: document.getElementById('healedOutputContainer'),
+            healedTextOutput: document.getElementById('healedTextOutput'),
+            
+            // Step 5
+            step5: document.getElementById('step5'),
+            customInputText: document.getElementById('customInputText'),
+            customMapA: document.getElementById('customMapA'),
+            customMapT: document.getElementById('customMapT'),
+            customMapC: document.getElementById('customMapC'),
+            customMapG: document.getElementById('customMapG'),
+            btnCustomEncode: document.getElementById('btnCustomEncode'),
+            btnCustomDecode: document.getElementById('btnCustomDecode'),
+            btnCustomBack: document.getElementById('btnCustomBack'),
+            errorStep5Container: document.getElementById('errorStep5Container'),
+            errorStep5: document.getElementById('errorStep5'),
+            customDnaSequence: document.getElementById('customDnaSequence'),
+            customBinarySequence: document.getElementById('customBinarySequence'),
+            customDecodedText: document.getElementById('customDecodedText'),
+            // Gemini elements for Step 5
+            generateMessageStep5Container: document.getElementById('generateMessageStep5Container'),
+            generateMessageStep5: document.getElementById('generateMessageStep5'),
+            btnCustomGenerateData: document.getElementById('btnCustomGenerateData'),
+            geminiExplainStep5Container: document.getElementById('geminiExplainStep5Container'),
+            geminiExplainStep5: document.getElementById('geminiExplainStep5'),
+            btnExplainConceptStep5: document.getElementById('btnExplainConceptStep5'),
+            explainMessageStep5Container: document.getElementById('explainMessageStep5Container'),
+            explainMessageStep5: document.getElementById('explainMessageStep5'),
+            // NEW: Step 5 Data Corruption
+            dataCorruptionContainerStep5: document.getElementById('dataCorruptionContainerStep5'),
+            btnCorruptDataStep5: document.getElementById('btnCorruptDataStep5'),
+            btnHealDataStep5: document.getElementById('btnHealDataStep5'),
+            healMessageContainerStep5: document.getElementById('healMessageContainerStep5'),
+            healMessageStep5: document.getElementById('healMessageStep5'),
+            healedOutputContainerStep5: document.getElementById('healedOutputContainerStep5'),
+            healedTextOutputStep5: document.getElementById('healedTextOutputStep5'),
+        };
+        
+        // --- TYPEWRITER EFFECT ---
+
+        /**
+         * Types out text into a target element.
+         * @param {HTMLElement} target - The element to type into.
+         * @param {string} text - The text to type.
+         */
+        function typewriter(target, text) {
+            const isInput = target.tagName === 'TEXTAREA' || target.tagName === 'INPUT';
+            let contentProp = isInput ? 'value' : 'innerHTML';
+            
+            let textTarget = isInput ? target : target.querySelector('.gemini-text-content');
+            if (!textTarget) textTarget = target; 
+            
+            textTarget[contentProp] = '';
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    let char = text.charAt(i);
+                    if (!isInput && char === '\n') {
+                        textTarget.innerHTML += '<br>';
+                    } else {
+                        textTarget[contentProp] += char;
+                    }
+                    i++;
+                    setTimeout(type, 20); // Adjust typing speed here
+                }
+            }
+            type();
+        }
+
+        // --- STATE & NAVIGATION ---
+        
+        /**
+         * Main navigation function.
+         * @param {string|number} step - 'start', 2, 4, or 5
+         */
+        function navigateToStep(step) {
+            if (step === 'start') {
+                elements.startPage.style.display = 'block';
+                elements.mainContent.style.display = 'none';
+                return;
+            }
+            
+            elements.startPage.style.display = 'none';
+            elements.mainContent.style.display = 'block';
+            
+            // Hide all steps
+            const steps = [elements.step2, elements.step4, elements.step5];
+            steps.forEach(s => {
+                if (s) s.style.display = 'none';
+            });
+            
+            // Show selected step
+            const selectedStep = document.getElementById('step' + step);
+            if (selectedStep) selectedStep.style.display = 'block';
+            
+            // Special handling for step 2 (real-time encode)
+            if (step === 2) {
+                // Trigger an immediate encode on navigate
+                debouncedEncode();
+            }
+            
+            // Special handling for step 4 (decode)
+            if (step === 4) {
+                updateDecodeMappingsDisplay(); // Update dynamic mapping
+                
+                // If DNA exists, show it and the corruption section
+                if (currentDNA) {
+                    elements.dnaSequenceDisplay4.textContent = currentDNA;
+                    elements.dataCorruptionContainer.classList.add('show');
+                } else {
+                    elements.dnaSequenceDisplay4.textContent = 'DNA sequence from encoding will appear here...';
+                    elements.dataCorruptionContainer.classList.remove('show');
+                }
+                resetStep4Outputs();
+            }
+            
+            // Special handling for step 5 (resimulate)
+            if (step === 5) {
+                hideSection(elements.dataCorruptionContainerStep5);
+                hideSection(elements.healMessageContainerStep5);
+                hideSection(elements.healedOutputContainerStep5);
+            }
+        }
+        
+        function decodeFromStartPage() {
+            if (!currentDNA) {
+                // Navigate first, then show error
+                navigateToStep(2);
+                showError('Please encode text first before decoding!', 2);
+                return;
+            }
+            navigateToStep(4);
+        }
+        
+        function decodeAndNavigate() {
+            if (!currentDNA) {
+                return showError('Please encode text first before decoding!', 2);
+            }
+            hideError(2);
+            navigateToStep(4);
+        }
+
+        function resetStep4Outputs() {
+            elements.binaryOutput.textContent = 'Press "Decode DNA Sequence" to see binary...';
+            elements.decodedOutput.textContent = 'Press "Decode DNA Sequence" to see decoded text...';
+            elements.geminiExplainStep4Container.classList.remove('show');
+            elements.explainMessageStep4Container.classList.remove('show');
+            elements.dataCorruptionContainer.classList.remove('show');
+            elements.healMessageContainer.classList.remove('show');
+            elements.healedOutputContainer.classList.remove('show');
+        }
+        
+        // --- UI TRANSITIONS & ERROR HANDLING ---
+        
+        /**
+         * Shows a collapsible section.
+         * @param {HTMLElement} container - The container element with .slide-fade-container
+         */
+        function showSection(container) {
+            if (container) {
+                container.classList.add('show');
+            }
+        }
+        
+        /**
+         * Hides a collapsible section.
+         * @param {HTMLElement} container - The container element with .slide-fade-container
+         */
+        function hideSection(container) {
+            if (container) {
+                container.classList.remove('show');
+            }
+        }
+
+        function showError(message, stepNum) {
+            playSound('error'); // NEW: Play error sound
+            hideAllErrors(); // Hide other errors first
+            const errorContainer = elements['errorStep' + stepNum + 'Container'];
+            const errorDiv = elements['errorStep' + stepNum];
+            if (errorContainer && errorDiv) {
+                errorDiv.textContent = message;
+                showSection(errorContainer);
+            }
+        }
+
+        function hideError(stepNum) {
+            const errorContainer = elements['errorStep' + stepNum + 'Container'];
+            if (errorContainer) {
+                hideSection(errorContainer);
+            }
+        }
+        
+        function hideAllErrors() {
+            [elements.errorStep2Container, elements.errorStep4Container, elements.errorStep5Container].forEach(hideSection);
+        }
+        
+        function hideAllGeminiMessages() {
+            [
+                elements.generateMessageContainer, elements.explainMessageStep2Container,
+                elements.explainMessageStep4Container, elements.healMessageContainer,
+                elements.generateMessageStep5Container, elements.explainMessageStep5Container,
+                elements.healMessageContainerStep5
+            ].forEach(hideSection);
+        }
+
+        // --- MAPPING & CONVERSION LOGIC ---
+
+        /**
+         * REFACTORED: No longer needed. Mappings are either CONSTANT or from Step 5.
+         */
+        // function getMappings() { ... }
+        // function validateMappings(stepNum) { ... }
+
+        /**
+         * Creates a reverse mapping object (e.g., {'A': '00'}).
+         * @param {object} mappings - The forward mapping (e.g., {'00': 'A'})
+         * @returns {object} The reversed mapping.
+         */
+        function createReverseMapping(mappings) {
+            const reverse = {};
+            for (let [binary, base] of Object.entries(mappings)) {
+                reverse[base] = binary;
+            }
+            return reverse;
+        }
+
+        function textToBinary(text) {
+            return text.split('').map(char => {
+                return char.charCodeAt(0).toString(2).padStart(8, '0');
+            }).join('');
+        }
+
+        function binaryToText(binary) {
+            const bytes = binary.match(/.{1,8}/g) || [];
+            return bytes.map(byte => {
+                if (byte.length < 8) return ''; // Ignore incomplete bytes
+                return String.fromCharCode(parseInt(byte, 2));
+            }).join('');
+        }
+
+        function binaryToDNA(binary, mappings) {
+            const pairs = binary.match(/.{1,2}/g) || [];
+            return pairs.map(pair => {
+                if (pair.length === 1) pair += '0'; // Pad incomplete pair
+                return mappings[pair] || '?'; // Use '?' for unknown pair
+            }).join('');
+        }
+
+        function dnaToBinary(dna, reverseMappings) {
+            return dna.split('').map(base => {
+                return reverseMappings[base.toUpperCase()] || '00'; // Default to '00' for unknown base
+            }).join('');
+        }
+
+        // --- CORE SIMULATION FUNCTIONS ---
+
+        /**
+         * Debounced function for real-time encoding in Step 2.
+         */
+        function debouncedEncode() {
+            clearTimeout(encodeDebounceTimer);
+            encodeDebounceTimer = setTimeout(() => {
+                encodeText(false); // Call encode, but don't show error if empty
+            }, DURATION_NORMAL); // Use constant
+        }
+
+        /**
+         * Encodes text from Step 2 using DEFAULT mappings.
+         * @param {boolean} showErrorOnEmpty - If true, shows error if input is empty.
+         */
+        function encodeText(showErrorOnEmpty = true) {
+            const text = elements.inputText.value;
+            
+            if (!text) {
+                if (showErrorOnEmpty) {
+                    showError('Please enter some text to encode!', 2);
+                }
+                hideAllEncodingResults(true);
+                currentDNA = '';
+                currentBinary = '';
+                return;
+            }
+
+            // Use default mappings
+            const mappings = DEFAULT_MAPPINGS;
+            currentReverseMappings = createReverseMapping(mappings); // Update global reverse map
+            currentBinary = textToBinary(text);
+            currentDNA = binaryToDNA(currentBinary, mappings);
+            lastOriginalText = text; // <-- Store the original text
+            
+            showEncodingResults(currentDNA);
+            hideError(2);
+        }
+        
+        /**
+         * Decodes the global currentDNA using the global currentReverseMappings.
+         */
+        function performDecoding() {
+            if (!currentDNA) {
+                return showError('No DNA sequence available. Please encode text first!', 4);
+            }
+            
+            // Use the globally set reverse mappings
+            const binary = dnaToBinary(currentDNA, currentReverseMappings);
+            const decodedText = binaryToText(binary);
+            
+            elements.binaryOutput.textContent = binary;
+            elements.decodedOutput.textContent = decodedText;
+            
+            showSection(elements.geminiExplainStep4Container);
+            hideSection(elements.explainMessageStep4Container);
+            showSection(elements.dataCorruptionContainer);
+            hideSection(elements.healMessageContainer);
+            hideSection(elements.healedOutputContainer);
+            
+            playSound('success');
+            hideError(4);
+        }
+        
+        // --- STEP 5: CUSTOM SIMULATION ---
+
+        function getCustomMappings() {
+            // Returns forward mapping {'00': 'A'}
+            const reverse = {
+                'A': elements.customMapA.value.toUpperCase(),
+                'T': elements.customMapT.value.toUpperCase(),
+                'C': elements.customMapC.value.toUpperCase(),
+                'G': elements.customMapG.value.toUpperCase()
+            };
+
+            const forward = {};
+            for(let [base, binary] of Object.entries(reverse)) {
+                forward[binary] = base;
+            }
+            return forward;
+        }
+        
+        function getCustomReverseMappings() {
+            // Returns reverse mapping {'A': '00'}
+             return {
+                'A': elements.customMapA.value.toUpperCase(),
+                'T': elements.customMapT.value.toUpperCase(),
+                'C': elements.customMapC.value.toUpperCase(),
+                'G': elements.customMapG.value.toUpperCase()
+            };
+        }
+
+        function validateCustomMappings() {
+            const customMappings = getCustomReverseMappings();
+            const mappingValues = Object.values(customMappings);
+            
+            if (new Set(mappingValues).size !== 4) {
+                showError('All custom base values must be unique.', 5);
+                return false;
+            }
+            for (const value of mappingValues) {
+                if (!/^[01]{2}$/.test(value)) {
+                    showError('Custom base values must be 2-digit binary numbers (e.g., 00, 01, 10, 11).', 5);
+                    return false;
+                }
+            }
+            hideError(5);
+            return true;
+        }
+
+        function encodeWithCustomValues() {
+            const customText = elements.customInputText.value;
+            if (!customText) {
+                return showError('Please enter text to encode.', 5);
+            }
+            if (!validateCustomMappings()) return;
+
+            const mappings = getCustomMappings(); // Get {'00': 'A'}
+            const binaryText = textToBinary(customText);
+            const dnaSequence = binaryToDNA(binaryText, mappings);
+
+            // BUG FIX: Update global state
+            currentDNA = dnaSequence;
+            currentBinary = binaryText;
+            currentReverseMappings = createReverseMapping(mappings);
+            lastOriginalText = customText; // <-- Store the original text
+
+            // Update local UI
+            elements.customDnaSequence.textContent = dnaSequence;
+            elements.customBinarySequence.textContent = binaryText;
+            elements.customDecodedText.textContent = ''; // Clear previous
+            
+            showSection(elements.geminiExplainStep5Container);
+            hideSection(elements.explainMessageStep5Container);
+            hideSection(elements.dataCorruptionContainerStep5);
+            hideSection(elements.healMessageContainerStep5);
+            hideSection(elements.healedOutputContainerStep5);
+        }
+
+        function decodeWithCustomValues() {
+            const dnaSequence = elements.customDnaSequence.textContent;
+            if (!dnaSequence) {
+                return showError('Please encode text first.', 5);
+            }
+            if (!validateCustomMappings()) return;
+
+            const reverseMappings = getCustomReverseMappings(); // Get {'A': '00'}
+            let binarySequence = dnaToBinary(dnaSequence, reverseMappings);
+
+            const decodedText = binaryToText(binarySequence);
+            elements.customDecodedText.textContent = decodedText;
+            
+            showSection(elements.geminiExplainStep5Container);
+            hideSection(elements.explainMessageStep5Container);
+            showSection(elements.dataCorruptionContainerStep5);
+            hideSection(elements.healMessageContainerStep5);
+            hideSection(elements.healedOutputContainerStep5);
+        }
+
+        // --- UI UPDATE FUNCTIONS ---
+        
+        /**
+         * Hides all result sections from Step 2.
+         * @param {boolean} animated - If true, uses slide/fade.
+         */
+        function hideAllEncodingResults(animated = true) {
+            const sections = [
+                elements.baseMappingDisplayContainer,
+                elements.encodedSequenceDisplayContainer,
+                elements.dnaVisualizationBarContainer,
+                elements.baseStatisticsContainer,
+                elements.geminiExplainStep2Container
+            ];
+            
+            if (animated) {
+                sections.forEach(hideSection);
+            } else {
+                sections.forEach(s => { if(s) s.classList.remove('show'); });
+            }
+        }
+
+        /**
+         * Shows results for Step 2. Reads from global currentReverseMappings.
+         * @param {string} dnaSequence - The DNA sequence to display.
+         */
+        function showEncodingResults(dnaSequence) {
+            // Update mapping display from global
+            elements.mapDisplayA.textContent = 'Binary: ' + (currentReverseMappings['A'] || 'N/A');
+            elements.mapDisplayT.textContent = 'Binary: ' + (currentReverseMappings['T'] || 'N/A');
+            elements.mapDisplayC.textContent = 'Binary: ' + (currentReverseMappings['C'] || 'N/A');
+            elements.mapDisplayG.textContent = 'Binary: ' + (currentReverseMappings['G'] || 'N/A');
+            
+            // Show all sections
+            showSection(elements.baseMappingDisplayContainer);
+            showSection(elements.encodedSequenceDisplayContainer);
+            showSection(elements.dnaVisualizationBarContainer);
+            showSection(elements.baseStatisticsContainer);
+            showSection(elements.geminiExplainStep2Container);
+            
+            hideSection(elements.explainMessageStep2Container);
+            elements.explainMessageStep2.querySelector('.gemini-text-content').innerHTML = '';
+            
+            elements.dnaSequenceDisplay.textContent = dnaSequence;
+            createVisualizationBar(dnaSequence);
+            calculateBaseStatistics(dnaSequence);
+        }
+        
+        /**
+         * Updates the dynamic mapping display in Step 4 from global state.
+         */
+        function updateDecodeMappingsDisplay() {
+            elements.decodeMapA.textContent = `Binary: ${currentReverseMappings['A'] || 'N/A'}`;
+            elements.decodeMapT.textContent = `Binary: ${currentReverseMappings['T'] || 'N/A'}`;
+            elements.decodeMapC.textContent = `Binary: ${currentReverseMappings['C'] || 'N/A'}`;
+            elements.decodeMapG.textContent = `Binary: ${currentReverseMappings['G'] || 'N/A'}`;
+        }
+
+        /**
+         * Creates the div-based visualization bar.
+         * @param {string} dnaSequence
+         */
+        function createVisualizationBar(dnaSequence) {
+            const container = elements.dnaBarContainer;
+            container.innerHTML = ''; // Clear previous
+            
+            const bases = dnaSequence.split('');
+            bases.forEach(base => {
+                const block = document.createElement('div');
+                block.className = 'dna-bar-block';
+                const upperBase = base.toUpperCase();
+                block.style.backgroundColor = baseColors[upperBase] || '#999';
+                block.textContent = base;
+                // Store binary data for tooltip
+                block.dataset.binary = currentReverseMappings[upperBase] || '??';
+                container.appendChild(block);
+            });
+        }
+
+        /**
+         * Calculates and displays base statistics.
+         * @param {string} dnaSequence
+         */
+        function calculateBaseStatistics(dnaSequence) {
+            const counts = { A: 0, T: 0, C: 0, G: 0 };
+            const total = dnaSequence.length;
+            
+            dnaSequence.split('').forEach(base => {
+                const upperBase = base.toUpperCase();
+                // Only count valid bases as defined in mapping
+                if (currentReverseMappings.hasOwnProperty(upperBase)) {
+                    counts[upperBase]++;
+                }
+            });
+            
+            elements.countA.textContent = counts.A;
+            elements.percentA.textContent = (total > 0 ? ((counts.A / total) * 100).toFixed(1) : 0) + '%';
+            elements.countT.textContent = counts.T;
+            elements.percentT.textContent = (total > 0 ? ((counts.T / total) * 100).toFixed(1) : 0) + '%';
+            elements.countC.textContent = counts.C;
+            elements.percentC.textContent = (total > 0 ? ((counts.C / total) * 100).toFixed(1) : 0) + '%';
+            elements.countG.textContent = counts.G;
+            elements.percentG.textContent = (total > 0 ? ((counts.G / total) * 100).toFixed(1) : 0) + '%';
+        }
+
+
+        // --- GEMINI API INTEGRATION ---
+
+        async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+            // This is the relative path to your Netlify serverless function
+            // It will be available at this path once deployed.
+            const apiUrl = "/.netlify/functions/gemini";
+
+            // The payload must match what your gemini.js function expects.
+            // Your function expects: JSON.parse(event.body).prompt
+            const payload = {
+                prompt: prompt 
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload) // Send the prompt in the body
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Netlify function error! status: ${response.status}`);
+                }
+
+                // The gemini.js function returns the *entire* JSON response from Google
+                const result = await response.json(); 
+                
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    return candidate.content.parts[0].text;
+                } else {
+                    // Check for errors returned from the Google API via your function
+                    if (result.error) {
+                         console.error("Error from Gemini API:", result.error.message);
+                         throw new Error(result.error.message);
+                    }
+                    throw new Error("Invalid response structure from Netlify function.");
+                }
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return callGeminiAPI(prompt, retries - 1, delay * 2);
+                } else {
+                    console.error("Netlify function call failed after retries:", error);
+                    throw error; // Re-throw the final error
+                }
+            }
+        }
+
+        /**
+         * Generates sample text for a target input/textarea.
+         */
+        async function generateSampleData(targetTextElement, targetMessageContainer, targetMessageElement, targetButtonElement) {
+            const loader = targetMessageElement.querySelector('.loader-content');
+            const textSpan = targetMessageElement.querySelector('.gemini-text-content');
+            
+            loader.style.display = 'flex';
+            textSpan.innerHTML = '';
+            showSection(targetMessageContainer);
+            targetButtonElement.disabled = true;
+
+            const prompt = "Please generate a short, unique, and interesting piece of text (under 150 characters) that could be 'archived' into DNA. This could be a famous quote, a short poem, or a fun scientific fact. Ensure it's different from any previous response.";
+
+            try {
+                const response = await callGeminiAPI(prompt);
+                const cleanedResponse = response.replace(/"/g, ''); // Clean up
+                
+                typewriter(targetTextElement, cleanedResponse);
+                
+                if (targetTextElement.id === 'customInputText') {
+                    encodeWithCustomValues();
+                } else {
+                    debouncedEncode();
+                }
+                
+                hideSection(targetMessageContainer); // Hide on success
+            } catch (error) {
+                textSpan.innerHTML = 'Error: Could not generate text. Please try again.';
+                loader.style.display = 'none'; // Hide loader on error
+            } finally {
+                targetButtonElement.disabled = false;
+            }
+        }
+
+
+        /**
+         * Explains the concept based on the source step.
+         */
+        async function explainConcept(source) {
+            let originalText = '', dna = '', messageContainer, messageEl, btnEl;
+
+            switch(source) {
+                case 'step2':
+                case 'step4': 
+                    originalText = elements.inputText.value;
+                    dna = currentDNA; // Use global DNA
+                    messageContainer = (source === 'step2') ? elements.geminiExplainStep2Container : elements.geminiExplainStep4Container;
+                    messageEl = (source === 'step2') ? elements.explainMessageStep2 : elements.explainMessageStep4;
+                    btnEl = (source ==='step2') ? elements.btnExplainConceptStep2 : elements.btnExplainConceptStep4;
+                    break;
+                case 'step5':
+                    originalText = elements.customInputText.value;
+                    dna = elements.customDnaSequence.textContent; // Use DNA from step 5 output
+                    messageContainer = elements.geminiExplainStep5Container;
+                    messageEl = elements.explainMessageStep5;
+                    btnEl = elements.btnExplainConceptStep5;
+                    break;
+                default:
+                    console.error('Invalid explainConcept source');
+                    return;
+            }
+            
+            let textForPrompt = originalText;
+            if (source === 'step4' && elements.decodedOutput && elements.decodedOutput.textContent !== 'Press "Decode DNA Sequence" to see decoded text...') {
+                 textForPrompt = elements.decodedOutput.textContent;
+            } else if (source === 'step5' && elements.customDecodedText.textContent) {
+                 textForPrompt = elements.customDecodedText.textContent;
+            }
+
+             if (!dna) {
+                 const textSpan = messageEl.querySelector('.gemini-text-content');
+                 textSpan.innerHTML = "Please encode some data first!";
+                 
+                 if (source === 'step2') showSection(elements.explainMessageStep2Container);
+                 else if (source === 'step4') showSection(elements.explainMessageStep4Container);
+                 else if (source === 'step5') showSection(elements.explainMessageStep5Container);
+                 return;
+             }
+            
+            const loader = messageEl.querySelector('.loader-content');
+            const textSpan = messageEl.querySelector('.gemini-text-content');
+            
+            loader.style.display = 'flex';
+            textSpan.innerHTML = '';
+            
+            if (source === 'step2') showSection(elements.explainMessageStep2Container);
+            else if (source === 'step4') showSection(elements.explainMessageStep4Container);
+            else if (source === 'step5') showSection(elements.explainMessageStep5Container); // <-- BUG FIX: Removed stray 'D'
+
+            btnEl.disabled = true;
+
+            const prompt = `You are a helpful science communicator. A user just simulated a DNA storage process.
+            - The original text was likely: "${textForPrompt}" (or something similar if only DNA is available)
+            - The resulting DNA sequence was: "${dna}"
+            In 3-4 simple sentences, explain what this process represents. Is this *real* biological DNA? What is the real-world potential for this technology? Address the user directly.`;
+
+            try {
+                const response = await callGeminiAPI(prompt);
+                typewriter(messageEl, response); // Typewriter finds the textSpan
+            } catch (error) {
+                textSpan.innerHTML = 'Error: Could not get explanation. Please try again.';
+            } finally {
+                loader.style.display = 'none'; // Hide loader
+                btnEl.disabled = false;
+            }
+        }
+        
+        // --- DATA CORRUPTION & HEALING (STEP 4) ---
+        
+        function corruptData() {
+            if (!currentDNA) {
+                return showError('No DNA sequence to corrupt.', 4);
+            }
+            
+            playSound('glitch');
+            
+            const bases = currentDNA.split('');
+            const errorCount = Math.floor(Math.random() * 3) + 1; // 1-3 errors
+            const possibleBases = ['A', 'T', 'C', 'G'];
+            
+            for (let i = 0; i < errorCount; i++) {
+                const index = Math.floor(Math.random() * bases.length);
+                const originalBase = bases[index];
+                let newBase;
+                do {
+                    newBase = possibleBases[Math.floor(Math.random() * 4)];
+                } while (newBase === originalBase);
+                bases[index] = newBase;
+            }
+            
+            const corruptedDNA = bases.join('');
+            currentDNA = corruptedDNA; // <-- BUG FIX: Update global state
+            
+            // Decode the corrupted DNA using the *current* mappings
+            const binary = dnaToBinary(corruptedDNA, currentReverseMappings);
+            const decodedText = binaryToText(binary);
+            
+            // Update UI
+            elements.dnaSequenceDisplay4.textContent = corruptedDNA;
+            elements.decodedOutput.textContent = decodedText;
+            elements.binaryOutput.textContent = binary;
+            
+            hideSection(elements.healedOutputContainer);
+            hideSection(elements.healMessageContainer);
+        }
+        
+        async function healData() {
+            const corruptedText = elements.decodedOutput.textContent;
+            // Get original from global state
+            const originalText = lastOriginalText; // <-- REFACTOR: Use reliable global state
+
+            if (!corruptedText || corruptedText === 'Press "Decode DNA Sequence" to see decoded text...') {
+                return showError('No corrupted text to heal.', 4);
+            }
+
+            const loader = elements.healMessage.querySelector('.loader-content');
+            const textSpan = elements.healMessage.querySelector('.gemini-text-content');
+            
+            loader.style.display = 'flex';
+            textSpan.innerHTML = '';
+            showSection(elements.healMessageContainer);
+            elements.btnHealData.disabled = true;
+
+            const prompt = `The following text was decoded from a slightly corrupted data source. The original text was *supposed* to be something like: "${originalText}".
+            
+Please analyze the "Corrupted text" below and correct any errors to make it as close to the original message as possible. Be concise and only output the fully corrected text.
+
+Corrupted text: "${corruptedText}"`;
+
+            try {
+                const response = await callGeminiAPI(prompt);
+                playSound('heal');
+                typewriter(elements.healedTextOutput, response);
+                showSection(elements.healedOutputContainer);
+            } catch (error) {
+                elements.healedTextOutput.innerHTML = "Error: Could not heal text.";
+                showSection(elements.healedOutputContainer);
+            } finally {
+                hideSection(elements.healMessageContainer);
+                elements.btnHealData.disabled = false;
+            }
+        }
+        
+        // --- DATA CORRUPTION & HEALING (STEP 5) ---
+        
+        function corruptDataStep5() {
+            const dnaSequence = elements.customDnaSequence.textContent;
+            if (!dnaSequence) {
+                return showError('No DNA sequence to corrupt.', 5);
+            }
+            
+            playSound('glitch');
+            
+            const bases = dnaSequence.split('');
+            const errorCount = Math.floor(Math.random() * 3) + 1; // 1-3 errors
+            const possibleBases = ['A', 'T', 'C', 'G'];
+            
+            for (let i = 0; i < errorCount; i++) {
+                const index = Math.floor(Math.random() * bases.length);
+                const originalBase = bases[index];
+                let newBase;
+                do {
+                    newBase = possibleBases[Math.floor(Math.random() * 4)];
+                } while (newBase === originalBase);
+                bases[index] = newBase;
+            }
+            
+            const corruptedDNA = bases.join('');
+            currentDNA = corruptedDNA; // <-- STANDARDIZATION: Keep global state in sync
+            
+            // Decode the corrupted DNA using custom mappings
+            const dnaToBinaryMap = getCustomReverseMappings();
+            let binary = dnaToBinary(corruptedDNA, dnaToBinaryMap);
+            const decodedText = binaryToText(binary);
+            
+            // Update UI
+            elements.customDnaSequence.textContent = corruptedDNA;
+            elements.customDecodedText.textContent = decodedText;
+            elements.customBinarySequence.textContent = binary;
+            
+            hideSection(elements.healedOutputContainerStep5);
+            hideSection(elements.healMessageContainerStep5);
+        }
+
+        async function healDataStep5() {
+            const corruptedText = elements.customDecodedText.textContent;
+            const originalText = lastOriginalText; // <-- REFACTOR: Use reliable global state
+
+            if (!corruptedText) {
+                return showError('No corrupted text to heal.', 5);
+            }
+
+            const loader = elements.healMessageStep5.querySelector('.loader-content');
+            const textSpan = elements.healMessageStep5.querySelector('.gemini-text-content');
+            
+            loader.style.display = 'flex';
+            textSpan.innerHTML = '';
+            showSection(elements.healMessageContainerStep5);
+            elements.btnHealDataStep5.disabled = true;
+
+            const prompt = `The following text was decoded from a slightly corrupted data source. The original text was *supposed* to be something like: "${originalText}".
+            
+Please analyze the "Corrupted text" below and correct any errors to make it as close to the original message as possible. Be concise and only output the fully corrected text.
+
+Corrupted text: "${corruptedText}"`;
+
+            try {
+                const response = await callGeminiAPI(prompt);
+                playSound('heal');
+                typewriter(elements.healedTextOutputStep5, response);
+                showSection(elements.healedOutputContainerStep5);
+            } catch (error) {
+                elements.healedTextOutputStep5.innerHTML = "Error: Could not heal text.";
+                showSection(elements.healedOutputContainerStep5);
+            } finally {
+                hideSection(elements.healMessageContainerStep5);
+                elements.btnHealDataStep5.disabled = false;
+            }
+        }
+        
+        // --- VISUALIZATION TOOLTIP ---
+        
+        function showTooltip(e) {
+            if (!e.target.classList.contains('dna-bar-block')) return;
+            isHolding = true;
+            
+            holdTimer = setTimeout(() => {
+                if (!isHolding) return; // Released before timer fired
+                
+                const block = e.target;
+                const binary = block.dataset.binary;
+                const rect = block.getBoundingClientRect();
+                const containerRect = elements.dnaBarContainer.getBoundingClientRect();
+                
+                elements.dnaTooltip.textContent = binary;
+                elements.dnaTooltip.style.display = 'block';
+                
+                // Position tooltip above the block
+                let top = rect.top - containerRect.top - elements.dnaTooltip.offsetHeight - 8;
+                let left = rect.left - containerRect.left + (rect.width / 2) - (elements.dnaTooltip.offsetWidth / 2);
+                
+                // Constrain within container
+                if (top < 0) top = rect.bottom - containerRect.top + 8;
+                if (left < 0) left = 0;
+                if (left + elements.dnaTooltip.offsetWidth > containerRect.width) {
+                    left = containerRect.width - elements.dnaTooltip.offsetWidth;
+                }
+                
+                elements.dnaTooltip.style.top = `${top}px`;
+                elements.dnaTooltip.style.left = `${left}px`;
+                elements.dnaTooltip.style.opacity = '1';
+                
+            }, DURATION_NORMAL); // Use constant
+        }
+        
+        function hideTooltip() {
+            isHolding = false;
+            clearTimeout(holdTimer);
+            if (elements.dnaTooltip) {
+                elements.dnaTooltip.style.opacity = '0';
+                // Use transitionend to hide, prevents flicker
+                elements.dnaTooltip.addEventListener('transitionend', () => {
+                    if (elements.dnaTooltip) {
+                        elements.dnaTooltip.style.display = 'none';
+                    }
+                }, { once: true });
+            }
+        }
+
+        // --- INITIALIZATION ---
+
+        /**
+         * Attaches all primary event listeners.
+         */
+        function initializeEventListeners() {
+            // --- Welcome Screen ---
+            elements.welcomeBtn.addEventListener('click', () => {
+                initAudio(); // Initialize AudioContext on first click
+                playSound('swoosh');
+                elements.welcomeScreen.style.opacity = '0';
+                elements.welcomeScreen.style.pointerEvents = 'none';
+                
+                elements.appContainer.style.opacity = '1';
+                elements.appContainer.style.pointerEvents = 'auto';
+                
+                setTimeout(() => {
+                    elements.welcomeScreen.style.display = 'none';
+                    navigateToStep('start');
+                }, DURATION_SLOW); // <-- Use constant
+            });
+            
+            // --- Generic Button Click Sound ---
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest('.btn')) {
+                    initAudio(); // Ensure audio is ready
+                    if (e.target.id !== 'welcomeBtn' && e.target.id !== 'btnCorruptData' && e.target.id !== 'btnCorruptDataStep5') {
+                        playSound('click');
+                    }
+                }
+            });
+
+            // --- Navigation ---
+            elements.btnMenuEncode.addEventListener('click', () => navigateToStep(2));
+            elements.btnMenuDecode.addEventListener('click', decodeFromStartPage);
+            elements.btnMenuResimulate.addEventListener('click', () => navigateToStep(5));
+            elements.btnBackToStart.addEventListener('click', () => navigateToStep('start'));
+            
+            // --- Step 2 ---
+            elements.inputText.addEventListener('input', debouncedEncode);
+            elements.btnEncode.addEventListener('click', () => encodeText(true));
+            elements.btnDecodeNav.addEventListener('click', decodeAndNavigate);
+            elements.btnResimulate.addEventListener('click', () => navigateToStep(5)); // CHANGED
+            elements.btnGenerateData.addEventListener('click', () => generateSampleData(elements.inputText, elements.generateMessageContainer, elements.generateMessage, elements.btnGenerateData));
+            elements.btnExplainConceptStep2.addEventListener('click', () => explainConcept('step2'));
+            // REMOVED: Listeners for map00-map11
+            
+            // --- Step 4 ---
+            elements.btnPerformDecode.addEventListener('click', performDecoding);
+            elements.btnResimulateFromDecode.addEventListener('click', () => navigateToStep(5)); // CHANGED
+            elements.btnExplainConceptStep4.addEventListener('click', () => explainConcept('step4'));
+            elements.btnCorruptData.addEventListener('click', corruptData);
+            elements.btnHealData.addEventListener('click', healData);
+            
+            // --- Step 5 ---
+            elements.btnCustomEncode.addEventListener('click', encodeWithCustomValues);
+            elements.btnCustomDecode.addEventListener('click', decodeWithCustomValues);
+            elements.btnCustomBack.addEventListener('click', () => navigateToStep('start'));
+            elements.btnCustomGenerateData.addEventListener('click', () => generateSampleData(elements.customInputText, elements.generateMessageStep5Container, elements.generateMessageStep5, elements.btnCustomGenerateData));
+            elements.btnExplainConceptStep5.addEventListener('click', () => explainConcept('step5'));
+            elements.btnCorruptDataStep5.addEventListener('click', corruptDataStep5);
+            elements.btnHealDataStep5.addEventListener('click', healDataStep5);
+            
+            // --- DNA Bar Tooltip Listeners ---
+            const barContainer = elements.dnaBarContainer;
+            if (barContainer) {
+                // Desktop
+                barContainer.addEventListener('mousedown', showTooltip);
+                document.addEventListener('mouseup', hideTooltip);
+                // Mobile
+                barContainer.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent scrolling while holding
+                    if (e.touches && e.touches.length > 0) {
+                        showTooltip({ target: e.target, ...e.touches[0] });
+                    }
+                });
+                document.addEventListener('touchend', hideTooltip);
+                document.addEventListener('touchcancel', hideTooltip);
+            }
+        }
+        
+        /**
+         * Helper to convert CSS var to number.
+         */
+        /* REMOVED: varToNum function is no longer needed
+        function varToNum(varName) {
+            return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(varName)) || 0;
+        }
+        */
+
+        // --- APP START ---
+        
+        window.addEventListener('load', () => {
+            initializeEventListeners();
+            // Start on the welcome screen
+            elements.welcomeScreen.style.display = 'flex';
+        });
+    </script>
+
+    <!-- REMOVED: Site-wide Footer from here -->
+</body>
+</html>
+
